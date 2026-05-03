@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>나의 포트폴리오</title>
+  <style>
+    @font-face {
+      font-family: 'DungGeunMo';
+      src: url('DungGeunMo.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a28;
+      --accent: #00f5a0;
+      --accent2: #00d9f5;
+      --text: #e8e8f0;
+      --muted: #6b6b88;
+      --border: #2a2a3d;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DungGeunMo', monospace;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    #cursor {
+      position: fixed; width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      mix-blend-mode: difference;
+      transition: width .15s, height .15s;
+    }
+    #cursor-ring {
+      position: fixed; width: 38px; height: 38px;
+      border: 1.5px solid var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: all .12s ease;
+      opacity: .55;
+    }
+    body:has(a:hover) #cursor-ring,
+    body:has(button:hover) #cursor-ring {
+      width: 56px; height: 56px; opacity: .9;
+    }
+
+    /* ── SCANLINES ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+      pointer-events: none; z-index: 9990;
+    }
+
+    /* ── PARTICLES CANVAS ── */
+    #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.1rem 3rem;
+      background: rgba(10,10,15,0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-size: 1rem; color: var(--accent); letter-spacing: .08em; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: .78rem; color: var(--muted); text-decoration: none;
+      letter-spacing: .12em; transition: color .2s; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; left: 0; bottom: -3px;
+      width: 0; height: 1px; background: var(--accent);
+      transition: width .25s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 8rem 3rem 4rem;
+      position: relative; overflow: hidden; z-index: 1;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px; opacity: .3;
+    }
+    /* moving glow */
+    .hero-glow {
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,245,160,.10) 0%, transparent 70%);
+      pointer-events: none; animation: floatGlow 8s ease-in-out infinite;
+      top: 10%; left: 55%;
+    }
+    .hero-glow2 {
+      position: absolute; width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,217,245,.07) 0%, transparent 70%);
+      pointer-events: none; animation: floatGlow 11s 3s ease-in-out infinite reverse;
+      top: 50%; left: 30%;
+    }
+    @keyframes floatGlow {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(40px,-30px) scale(1.1); }
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+    .hero-tag {
+      font-size: .72rem; color: var(--accent);
+      letter-spacing: .28em; text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0; animation: fadeUp .6s .15s forwards;
+    }
+
+    /* glitch title */
+    .hero-name {
+      font-size: clamp(2.8rem, 8vw, 6rem);
+      line-height: 1.05; letter-spacing: -.01em;
+      opacity: 0; animation: fadeUp .7s .35s forwards;
+    }
+    .hero-name .hi { color: var(--text); }
+    .hero-name .name-glitch {
+      color: var(--accent);
+      position: relative; display: inline-block;
+    }
+    .hero-name .name-glitch::before,
+    .hero-name .name-glitch::after {
+      content: attr(data-text);
+      position: absolute; left: 0; top: 0;
+      width: 100%;
+    }
+    .hero-name .name-glitch::before {
+      color: var(--accent2);
+      animation: glitch1 4s 2s infinite;
+    }
+    .hero-name .name-glitch::after {
+      color: #f0f;
+      animation: glitch2 4s 2.3s infinite;
+    }
+    @keyframes glitch1 {
+      0%,90%,100% { clip-path: none; transform: none; opacity: 0; }
+      91% { clip-path: inset(30% 0 50% 0); transform: translateX(-4px); opacity: .7; }
+      93% { clip-path: inset(70% 0 10% 0); transform: translateX(4px); opacity: .7; }
+      95% { clip-path: inset(10% 0 80% 0); transform: translateX(-2px); opacity: .7; }
+      97% { clip-path: none; transform: none; opacity: 0; }
+    }
+    @keyframes glitch2 {
+      0%,90%,100% { clip-path: none; transform: none; opacity: 0; }
+      92% { clip-path: inset(60% 0 20% 0); transform: translateX(5px); opacity: .5; }
+      94% { clip-path: inset(20% 0 60% 0); transform: translateX(-5px); opacity: .5; }
+      96% { clip-path: none; transform: none; opacity: 0; }
+    }
+
+    .hero-role {
+      font-size: clamp(.9rem, 2.2vw, 1.2rem); color: var(--muted);
+      margin-top: 1.2rem; letter-spacing: .15em;
+      opacity: 0; animation: fadeUp .7s .55s forwards;
+    }
+    .hero-desc {
+      max-width: 520px; font-size: .9rem; color: var(--muted);
+      line-height: 2; margin-top: 1.4rem;
+      opacity: 0; animation: fadeUp .7s .75s forwards;
+    }
+    .hero-cta {
+      display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp .7s .95s forwards;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: 'DungGeunMo', monospace;
+      font-size: .78rem; letter-spacing: .1em;
+      padding: .75rem 1.8rem; border-radius: 3px;
+      text-decoration: none; transition: all .22s; display: inline-block;
+    }
+    .btn-primary {
+      background: var(--accent); color: #000; border: none; font-weight: bold;
+    }
+    .btn-primary:hover {
+      background: #00e090; transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,245,160,.35), 0 0 40px rgba(0,245,160,.15);
+    }
+    .btn-outline {
+      background: transparent; color: var(--text); border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent); color: var(--accent); transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,245,160,.12);
+    }
+
+    /* ── SECTIONS ── */
+    .sec { padding: 6rem 3rem; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+    .sec-label {
+      font-size: .68rem; color: var(--accent);
+      letter-spacing: .28em; text-transform: uppercase; margin-bottom: .5rem;
+    }
+    .sec-title {
+      font-size: clamp(1.6rem, 4vw, 2.5rem); margin-bottom: 3rem; line-height: 1.1;
+    }
+
+    /* ── REVEAL ── */
+    .reveal {
+      opacity: 0; transform: translateY(32px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.up { opacity: 1; transform: translateY(0); }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+    }
+    .about-text p {
+      font-size: .9rem; color: var(--muted); line-height: 2; margin-bottom: 1.1rem;
+    }
+    .about-text strong { color: var(--accent); }
+
+    /* terminal */
+    .terminal {
+      background: #060608; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .terminal-bar {
+      display: flex; align-items: center; gap: .5rem;
+      background: var(--surface2); padding: .6rem 1rem; border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dr { background: #ff5f57; } .dy { background: #febc2e; } .dg { background: #28c840; }
+    .terminal-title { font-size: .68rem; color: var(--muted); margin-left: auto; }
+    .terminal-body { padding: 1.4rem; font-size: .82rem; line-height: 2.1; }
+    .tp { color: var(--accent); } .tpath { color: var(--accent2); }
+    .tout { color: var(--muted); }
+    .tval { color: #e6db74; }
+    .tcursor {
+      display: inline-block; width: 9px; height: 1.1em;
+      background: var(--accent); vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── SKILLS ── */
+    #skills-bg { background: var(--surface); position: relative; z-index: 1; }
+    .skills-inner { max-width: 1100px; margin: 0 auto; padding: 6rem 3rem; }
+    .skills-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem;
+    }
+    .skill-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1.7rem;
+      transition: all .3s; position: relative; overflow: hidden;
+    }
+    .skill-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transform: scaleX(0); transform-origin: left; transition: transform .35s;
+    }
+    .skill-card:hover { border-color: rgba(0,245,160,.35); transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
+    .skill-card:hover::before { transform: scaleX(1); }
+    .skill-card-title { font-size: .8rem; color: var(--accent2); margin-bottom: 1rem; letter-spacing: .08em; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .tag {
+      font-size: .7rem; padding: .25rem .65rem; border-radius: 3px;
+      background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+      transition: border-color .2s, color .2s;
+    }
+    .skill-card:hover .tag { border-color: rgba(0,245,160,.2); }
+
+    /* ── PROJECTS ── */
+    .projects-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.4rem;
+    }
+    .project-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      transition: all .3s;
+    }
+    .project-card:hover {
+      border-color: rgba(0,245,160,.4); transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(0,245,160,.1);
+    }
+    .project-thumb {
+      height: 155px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--surface2), var(--bg));
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    /* shimmer on hover */
+    .project-thumb::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,245,160,.06), rgba(0,217,245,.06));
+      transition: opacity .3s;
+    }
+    .project-card:hover .project-thumb::after { opacity: 2; }
+    .project-body { padding: 1.4rem; }
+    .project-name { font-size: .98rem; margin-bottom: .5rem; }
+    .project-desc { font-size: .83rem; color: var(--muted); line-height: 1.8; margin-bottom: 1.2rem; }
+    .project-links { display: flex; gap: .6rem; }
+    .project-link {
+      font-family: 'DungGeunMo', monospace; font-size: .7rem;
+      color: var(--accent); text-decoration: none;
+      border: 1px solid rgba(0,245,160,.3); padding: .28rem .75rem; border-radius: 3px;
+      transition: all .2s;
+    }
+    .project-link:hover { background: rgba(0,245,160,.12); transform: translateY(-1px); }
+
+    /* ── EXPERIENCE ── */
+    .timeline { border-left: 1px solid var(--border); padding-left: 2rem; }
+    .timeline-item { position: relative; margin-bottom: 2.5rem; }
+    .timeline-item::before {
+      content: ''; position: absolute;
+      left: -2.47rem; top: .32rem;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg);
+      box-shadow: 0 0 12px rgba(0,245,160,.6), 0 0 24px rgba(0,245,160,.2);
+    }
+    .timeline-period { font-size: .7rem; color: var(--accent2); letter-spacing: .1em; margin-bottom: .3rem; }
+    .timeline-role { font-size: 1.05rem; margin-bottom: .2rem; }
+    .timeline-company { font-size: .86rem; color: var(--muted); margin-bottom: .6rem; }
+    .timeline-desc { font-size: .84rem; color: var(--muted); line-height: 1.9; }
+
+    /* ── CONTACT ── */
+    #contact { position: relative; z-index: 1; }
+    .contact-inner { text-align: center; }
+    .contact-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 4rem;
+      max-width: 620px; margin: 0 auto;
+      position: relative; overflow: hidden;
+    }
+    .contact-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,245,160,.05), transparent 60%);
+      pointer-events: none;
+    }
+    .contact-card p { font-size: .9rem; color: var(--muted); line-height: 1.9; margin-bottom: 2rem; }
+    .contact-links { display: flex; justify-content: center; gap: .8rem; flex-wrap: wrap; }
+    .contact-link {
+      font-family: 'DungGeunMo', monospace; font-size: .75rem;
+      color: var(--text); text-decoration: none;
+      border: 1px solid var(--border); padding: .55rem 1.1rem; border-radius: 4px;
+      transition: all .22s; display: flex; align-items: center; gap: .5rem;
+    }
+    .contact-link:hover {
+      border-color: var(--accent); color: var(--accent);
+      transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,245,160,.15);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: .7rem; color: var(--muted);
+      position: relative; z-index: 1;
+    }
+
+    /* ── KEYFRAMES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      nav { padding: 1rem 1.5rem; } .nav-links { gap: 1rem; }
+      #hero { padding: 7rem 1.5rem 3rem; }
+      .sec { padding: 4rem 1.5rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .contact-card { padding: 2.5rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">[ 송민혁 ]</div>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#experience">experience</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-content">
+    <div class="hero-tag">// PORTFOLIO · 2026</div>
+    <h1 class="hero-name">
+      <span class="hi">안녕하세요,<br>저는 </span><span class="name-glitch" data-text="송민혁">송민혁</span>입니다.
+    </h1>
+    <p class="hero-role">Developer · Game Engineer · Creator</p>
+    <p class="hero-desc">
+      당신의 시간을 뺴았는 개발자가 되고 싶습니다.<br>
+      깔끔한 코드와 효율적인 시스템 설계를 추구합니다.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">프로젝트 보기</a>
+      <a href="#contact" class="btn btn-outline">연락하기</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="sec">
+    <div class="sec-label">// 01. about</div>
+    <h2 class="sec-title reveal">자기 소개</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p class="reveal">저는 <strong>송민혁</strong>입니다.<br>동의대학교 게임공학과를 1학년 수료하고 현재 휴학 중입니다.</p>
+        <p class="reveal">잠시 길을 잃던 중 이 "방향만큼의 재미가 있겠다."라고 느껴 이 쪽으로 걸어 왔다.</p>
+        <p class="reveal">새로운 알고리즘을 꾸준히 학습하고, 코드 리뷰와 문서화를 배워 오류의 발생률이 낮게 만드는 것을 좋아합니다.</p>
+      </div>
+      <div class="terminal reveal">
+        <div class="terminal-bar">
+          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
+          <span class="terminal-title">info.sh — bash</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="tp">➜</span> <span class="tpath">~/portfolio</span> cat info.json</div>
+          <div class="tout">{</div>
+          <div class="tout">&nbsp;&nbsp;"name": <span class="tval">"송민혁"</span>,</div>
+          <div class="tout">&nbsp;&nbsp;"school": <span class="tval">"동의대학교 게임공학과"</span>,</div>
+          <div class="tout">&nbsp;&nbsp;"github": <span class="tval">"kkwechang"</span>,</div>
+          <div class="tout">&nbsp;&nbsp;"discord": <span class="tval">"kkwechang"</span>,</div>
+          <div class="tout">&nbsp;&nbsp;"status": <span class="tval">"🟢 활동중"</span></div>
+          <div class="tout">}</div>
+          <br>
+          <div><span class="tp">➜</span> <span class="tpath">~/portfolio</span> <span class="tcursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<div id="skills-bg">
+  <div class="skills-inner">
+    <div class="sec-label">// 02. skills</div>
+    <h2 class="sec-title reveal">기술</h2>
+    <div class="skills-grid">
+      <div class="skill-card reveal">
+        <div class="skill-card-title">Backend</div>
+        <div class="skill-tags">
+          <span class="tag">Python</span><span class="tag">C++</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-card-title">Database</div>
+        <div class="skill-tags">
+          </span><span class="tag">SQL</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-card-title">Game Engine</div>
+        <div class="skill-tags">
+          <span class="tag">Unity</span><span class="tag">Godot</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="sec">
+    <div class="sec-label">// 03. projects</div>
+    <h2 class="sec-title reveal">프로젝트</h2>
+    <div class="projects-grid">
+      <div class="project-card reveal">
+        <div class="project-thumb">🤖</div>
+        <div class="project-body">
+          <div class="project-name">디스코드 음악 봇</div>
+          <p class="project-desc">Termux를 활용하여 YouTube api를 가져와 음악을 재생 봇임.</p>
+          <div class="project-links">
+            <a href="https://github.com/kkwechang/discord_music_bot" class="project-link">GitHub</a>
+            <a href="https://discord.gg/XmPcw3HhCM" class="project-link">이동</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb">📓</div>
+        <div class="project-body">
+          <div class="project-name">디스코드 복무일기 봇</div>
+          <p class="project-desc">Termux를 활용하여 Discord에서 복무 일기를 기록하는 봇임.</p>
+          <div class="project-links">
+            <a href="https://github.com/kkwechang/Discord_Diary_Bot" class="project-link">GitHub</a>
+            <a href="https://discord.gg/XmPcw3HhCM" class="project-link">이동</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb">🎮</div>
+        <div class="project-body">
+          <div class="project-name">더 파이널</div>
+          <p class="project-desc">상상만 하던 게임을 직접 개발한 프로젝트.</p>
+          <div class="project-links">
+            <a href="Game_Composition.cell" class="project-link" download>게임 구성</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="sec">
+    <div class="sec-label">// 04. experience</div>
+    <h2 class="sec-title reveal">학력</h2>
+    <div class="timeline">
+      <div class="timeline-item reveal">
+        <div class="timeline-period">2025.03 — 2026.02 휴학</div>
+        <div class="timeline-role">동의대학교</div>
+        <div class="timeline-company">게임공학과</div>
+        <div class="timeline-desc">학점 3.13 / 4.50 · 1학년 수료</div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-period">2022.03 — 2025.01</div>
+        <div class="timeline-role">장유고등학교</div>
+        <div class="timeline-company">일반고등학교</div>
+        <div class="timeline-desc">졸업</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<div id="contact">
+  <div class="sec contact-inner">
+    <div class="sec-label">// 05. contact</div>
+    <h2 class="sec-title reveal">연락하기</h2>
+    <div class="contact-card reveal">
+      <p>개인적인 일이거나 심심하면 연락을 해도 좋습니다.</p>
+      <div class="contact-links">
+        <a href="mailto:poavoid1@gmail.com" class="contact-link">📧 이메일</a>
+        <a href="https://github.com/kkwechang" target="_blank" class="contact-link">🐱 GitHub</a>
+        <a href="https://discord.gg/XmPcw3HhCM" target="_blank" class="contact-link">💬 디스코드 서버</a>
+        <a href="https://www.notion.so/2e46757fa1ea80e48ae6dfa4e959dedc" target="_blank" class="contact-link">📝 노션</a>
+        <a href="https://solved.ac/profile/aslgur100" target="_blank" class="contact-link">[ac] solved.ac</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 송민혁 · Crafted with 둥근모 &amp; 열정
+</footer>
+
+<script>
+// ── CURSOR ──
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+(function animRing(){
+  rx+=(mx-rx)*.12; ry+=(my-ry)*.12;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ ring.style.width='56px'; ring.style.height='56px'; ring.style.opacity='1'; });
+  el.addEventListener('mouseleave',()=>{ ring.style.width='38px'; ring.style.height='38px'; ring.style.opacity='.55'; });
+});
+
+// ── PARTICLES ──
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let W,H,pts=[];
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+resize(); window.addEventListener('resize',resize);
+for(let i=0;i<70;i++) pts.push({
+  x:Math.random()*9999,y:Math.random()*9999,
+  vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
+  r:Math.random()*1.5+.5, o:Math.random()*.5+.1
+});
+function drawParticles(){
+  ctx.clearRect(0,0,W,H);
+  pts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,245,160,${p.o})`;
+    ctx.fill();
+  });
+  // lines between close particles
+  for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+    const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<120){
+      ctx.beginPath();
+      ctx.moveTo(pts[i].x,pts[i].y);
+      ctx.lineTo(pts[j].x,pts[j].y);
+      ctx.strokeStyle=`rgba(0,245,160,${(.15*(1-d/120)).toFixed(3)})`;
+      ctx.lineWidth=.5;
+      ctx.stroke();
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ── SCROLL REVEAL ──
+const revEls=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('up'), i*90);
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:.1});
+revEls.forEach(el=>obs.observe(el));
+
+// ── TERMINAL TYPEWRITER ──
+setTimeout(()=>{
+  document.querySelectorAll('.tout').forEach((el,i)=>{
+    el.style.opacity=0;
+    setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity=1; }, i*160);
+  });
+},600);
+</script>
+</body>
+</html>
