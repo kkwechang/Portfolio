@@ -24,13 +24,16 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'DungGeunMo', monospace;
       overflow-x: hidden;
+      max-width: 100%;
+      word-break: keep-all;
+      overflow-wrap: break-word;
       cursor: none;
     }
 
@@ -38,7 +41,7 @@
     #cursor {
       position: fixed; width: 10px; height: 10px;
       background: var(--accent); border-radius: 50%;
-      pointer-events: none; z-index: 9999;
+      pointer-events: none; z-index: 400;
       transform: translate(-50%,-50%);
       mix-blend-mode: difference;
       transition: width .15s, height .15s;
@@ -46,7 +49,7 @@
     #cursor-ring {
       position: fixed; width: 38px; height: 38px;
       border: 1.5px solid var(--accent); border-radius: 50%;
-      pointer-events: none; z-index: 9998;
+      pointer-events: none; z-index: 399;
       transform: translate(-50%,-50%);
       transition: all .12s ease;
       opacity: .55;
@@ -61,7 +64,7 @@
       content: '';
       position: fixed; inset: 0;
       background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
-      pointer-events: none; z-index: 9990;
+      pointer-events: none; z-index: 300;
     }
 
     /* ── PARTICLES CANVAS ── */
@@ -69,7 +72,7 @@
 
     /* ── NAV ── */
     nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; justify-content: space-between; align-items: center;
       padding: 1.1rem 3rem;
       background: rgba(10,10,15,0.88);
@@ -77,6 +80,7 @@
       border-bottom: 1px solid var(--border);
     }
     .nav-logo { font-size: 1rem; color: var(--accent); letter-spacing: .08em; }
+    .hamburger { display: none; }
     .nav-links { display: flex; gap: 2rem; list-style: none; }
     .nav-links a {
       font-size: .78rem; color: var(--muted); text-decoration: none;
@@ -219,15 +223,18 @@
 
     /* ── REVEAL ── */
     .reveal {
-      opacity: 0; transform: translateY(32px);
+      transform: translateY(32px);
       transition: opacity .7s ease, transform .7s ease;
     }
+    .reveal.hidden-before { opacity: 0; }
     .reveal.up { opacity: 1; transform: translateY(0); }
 
     /* ── ABOUT ── */
     .about-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+      width: 100%; min-width: 0;
     }
+    .about-text, .about-text p { min-width: 0; width: 100%; }
     .about-text p {
       font-size: .9rem; color: var(--muted); line-height: 2; margin-bottom: 1.1rem;
     }
@@ -236,6 +243,7 @@
     /* terminal */
     .terminal {
       background: #060608; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+      min-width: 0; max-width: 100%;
       box-shadow: 0 20px 60px rgba(0,0,0,.5);
     }
     .terminal-bar {
@@ -245,7 +253,7 @@
     .dot { width: 11px; height: 11px; border-radius: 50%; }
     .dr { background: #ff5f57; } .dy { background: #febc2e; } .dg { background: #28c840; }
     .terminal-title { font-size: .68rem; color: var(--muted); margin-left: auto; }
-    .terminal-body { padding: 1.4rem; font-size: .82rem; line-height: 2.1; }
+    .terminal-body { padding: 1.4rem; font-size: .82rem; line-height: 2.1; word-break: break-all; overflow-x: auto; }
     .tp { color: var(--accent); } .tpath { color: var(--accent2); }
     .tout { color: var(--muted); }
     .tval { color: #e6db74; }
@@ -260,7 +268,7 @@
     #skills-bg { background: var(--surface); position: relative; z-index: 1; }
     .skills-inner { max-width: 1100px; margin: 0 auto; padding: 6rem 3rem; }
     .skills-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem;
     }
     .skill-card {
       background: var(--bg); border: 1px solid var(--border);
@@ -285,7 +293,7 @@
 
     /* ── PROJECTS ── */
     .projects-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.4rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.4rem;
     }
     .project-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -382,12 +390,92 @@
     }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 700px) {
-      nav { padding: 1rem 1.5rem; } .nav-links { gap: 1rem; }
-      #hero { padding: 7rem 1.5rem 3rem; }
-      .sec { padding: 4rem 1.5rem; }
+
+    /* 태블릿 (768px 이하) */
+    @media (max-width: 768px) {
       .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-      .contact-card { padding: 2.5rem 1.5rem; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .contact-card { padding: 3rem 2rem; }
+      .sec { padding: 5rem 2rem; }
+      .skills-inner { padding: 5rem 2rem; }
+    }
+
+    /* 모바일 (480px 이하) */
+    @media (max-width: 480px) {
+      /* Nav → 햄버거 */
+      nav { padding: .9rem 1.2rem; }
+      .nav-logo { font-size: .9rem; }
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: #0a0a0f;
+        justify-content: center; align-items: center;
+        gap: 2.5rem; z-index: 200;
+        list-style: none;
+        margin: 0; padding: 0;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 1.1rem; letter-spacing: .2em; }
+      .hamburger {
+        display: flex; flex-direction: column; justify-content: space-between;
+        width: 24px; height: 17px; cursor: pointer; z-index: 210;
+        position: relative;
+      }
+      .hamburger span {
+        display: block; width: 100%; height: 2px;
+        background: var(--accent); border-radius: 2px;
+        transition: all .3s ease;
+      }
+      .hamburger.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+      /* Hero */
+      #hero { padding: 6rem 1.2rem 3rem; }
+      .hero-name { font-size: clamp(2.2rem, 11vw, 3rem); }
+      .hero-role { font-size: .85rem; letter-spacing: .08em; }
+      .hero-desc { font-size: .82rem; }
+      .hero-cta { flex-direction: column; gap: .8rem; }
+      .btn { width: 100%; text-align: center; padding: .9rem 1.2rem; }
+
+      /* Sections */
+      .sec { padding: 4rem 1.2rem; }
+      .skills-inner { padding: 4rem 1.2rem; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .about-text p { font-size: .85rem; }
+
+      /* Terminal */
+      .terminal-body { font-size: .73rem; padding: 1rem; }
+
+      /* Projects */
+      .projects-grid { grid-template-columns: 1fr; }
+      .project-thumb { height: 120px; font-size: 2.4rem; }
+
+      /* Contact */
+      .contact-card { padding: 2rem 1.2rem; }
+      .contact-links { flex-direction: column; align-items: stretch; }
+      .contact-link { justify-content: center; }
+
+      /* Timeline */
+      .timeline { padding-left: 1.4rem; }
+      .timeline-item::before { left: -1.87rem; }
+
+      /* Cursor 숨김 (터치 기기) */
+      #cursor, #cursor-ring { display: none; }
+      body { cursor: auto; }
+
+      /* Section title */
+      .sec-title { font-size: clamp(1.4rem, 7vw, 2rem); margin-bottom: 2rem; }
+    }
+
+    /* 아주 작은 화면 (360px 이하) */
+    @media (max-width: 360px) {
+      .hero-name { font-size: 2rem; }
+      .sec { padding: 3rem 1rem; }
+      .skills-inner { padding: 3rem 1rem; }
     }
   </style>
 </head>
@@ -400,13 +488,16 @@
 <!-- NAV -->
 <nav>
   <div class="nav-logo">[ 송민혁 ]</div>
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="#about">about</a></li>
     <li><a href="#skills">skills</a></li>
     <li><a href="#projects">projects</a></li>
     <li><a href="#experience">experience</a></li>
     <li><a href="#contact">contact</a></li>
   </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -526,7 +617,7 @@
           <div class="project-name">더 파이널</div>
           <p class="project-desc">상상만 하던 게임을 직접 개발한 프로젝트.</p>
           <div class="project-links">
-            <a href="Game_Composition.cell" class="project-link" download>게임 구성</a>
+            <a href="#" class="project-link">구성</a>
           </div>
         </div>
       </div>
@@ -635,14 +726,19 @@ drawParticles();
 
 // ── SCROLL REVEAL ──
 const revEls=document.querySelectorAll('.reveal');
+// 초기에 hidden 처리
+revEls.forEach(el=>el.classList.add('hidden-before'));
 const obs=new IntersectionObserver((entries)=>{
   entries.forEach((e,i)=>{
     if(e.isIntersecting){
-      setTimeout(()=>e.target.classList.add('up'), i*90);
+      setTimeout(()=>{
+        e.target.classList.add('up');
+        e.target.classList.remove('hidden-before');
+      }, i*90);
       obs.unobserve(e.target);
     }
   });
-},{threshold:.1});
+},{threshold:0.05, rootMargin:'0px 0px -20px 0px'});
 revEls.forEach(el=>obs.observe(el));
 
 // ── TERMINAL TYPEWRITER ──
@@ -652,6 +748,30 @@ setTimeout(()=>{
     setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity=1; }, i*160);
   });
 },600);
+
+// ── HAMBURGER NAV ──
+function toggleNav(){
+  const nav = document.getElementById('navLinks');
+  const ham = document.getElementById('hamburger');
+  nav.classList.toggle('open');
+  ham.classList.toggle('open');
+  document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+}
+// 메뉴 클릭시 닫기
+document.querySelectorAll('.nav-links a').forEach(a=>{
+  a.addEventListener('click', ()=>{
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+    document.body.style.overflow='';
+  });
+});
+
+// 터치 기기 감지 → 커서 숨김
+if('ontouchstart' in window){
+  document.getElementById('cursor').style.display='none';
+  document.getElementById('cursor-ring').style.display='none';
+  document.body.style.cursor='auto';
+}
 </script>
 </body>
 </html>
